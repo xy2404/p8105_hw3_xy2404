@@ -187,3 +187,95 @@ mean_instacart = instacart %>%
 |:-----------------|---------:|---------:|---------:|---------:|---------:|---------:|---------:|
 | Coffee Ice Cream |  13.77419|  14.31579|  15.38095|  15.31818|  15.21739|  12.26316|  13.83333|
 | Pink Lady Apples |  13.44118|  11.36000|  11.70213|  14.25000|  11.55172|  12.78431|  11.93750|
+
+Problem 3
+=========
+
+``` r
+library(p8105.datasets)
+data(ny_noaa)
+```
+
+The dataset has has 2595176 rows and 7 columns. The dataset contains id, date, prcp, snow, snwd, tmax, tmin variables.
+
+Do some data cleaning. Create separate variables for year, month, and day. Ensure observations for temperature, precipitation, and snowfall are given in reasonable units. For snowfall, what are the most commonly observed values? Why?
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+``` r
+nynoaa <- 
+  ny_noaa %>% 
+  janitor::clean_names() %>%
+  separate(date, into = c("Year", "Month", "Day"), sep = "-") %>% 
+  janitor::clean_names() 
+
+knitr::kable(nynoaa %>%   
+  group_by(snow) %>% 
+  summarise(n=n()) %>% 
+  mutate(tem_ranking =  min_rank(desc(n))) %>% 
+  filter(min_rank(desc(n)) ==1))
+```
+
+|  snow|        n|  tem\_ranking|
+|-----:|--------:|-------------:|
+|     0|  2008508|             1|
+
+Make a two-panel plot showing the average max temperature in January and in July in each station across years. Is there any observable / interpretable structure? Any outliers?
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+``` r
+ny_df_1 =
+  nynoaa %>% 
+  group_by(month,id) %>% 
+  mutate(tmax = as.numeric(tmax)) %>% 
+  mutate(tmin = as.numeric(tmin)) %>% 
+  filter(month == "01"|month == "07") %>%
+  na.omit() %>% 
+  summarise(mean_temp = mean(tmax))
+```
+
+``` r
+ny_df_1 %>% 
+ggplot(aes(y = mean_temp))+
+    geom_boxplot()+
+    facet_grid(.~month)+
+    ggtitle("The average max temperature in January and in July in each station across years")
+```
+
+![](Homework_3_files/figure-markdown_github/unnamed-chunk-14-1.png)
+
+``` r
+ny_df_1 %>% 
+ggplot(aes(x = id, y = mean_temp))+
+   geom_point()+
+   ggtitle("The average max temperature in January and in July in each station across years")+
+   facet_grid(.~month)+
+   viridis::scale_fill_viridis(discrete = TRUE)
+```
+
+![](Homework_3_files/figure-markdown_github/unnamed-chunk-15-1.png)
+
+Make a two-panel plot showing (i) tmax vs tmin for the full dataset (note that a scatterplot may not be the best option).(2)Make a plot showing the distribution of snowfall values greater than 0 and less than 100 separately by year.
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+``` r
+tmax_vs_tmin <-nynoaa %>% 
+  group_by(year, month) %>% 
+  na.omit(tmax) %>% 
+  na.omit(tmin) %>% 
+  mutate(tmax_2 = as.numeric(tmax, na.rm = TRUE)) %>% 
+  mutate(tmin_2 = as.numeric(tmin, na.rm = TRUE)) %>% 
+  ggplot(aes(tmin_2,tmax_2))+
+  geom_hex(bins = 15)+
+  theme(legend.position = "bottom")
+
+snowfall_value<-nynoaa %>% 
+  filter(snow>0, snow<100) %>% 
+  ggplot(aes(x = snow, fill = year))+
+  geom_density(alpha = 0.5)+
+  ggtitle("The distribution of snowfall")+
+  theme(legend.position = "bottom")
+
+  tmax_vs_tmin+snowfall_value  
+```
+
+![](Homework_3_files/figure-markdown_github/unnamed-chunk-16-1.png)
