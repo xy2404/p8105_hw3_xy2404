@@ -90,3 +90,62 @@ ggplot(five_panel, aes(x = year, y = average_response))+
     y = "state level average of proportion"
   )
 ``` 
+
+
+# Problem 2
+
+```{r}
+library(p8105.datasets)
+data(instacart)
+```
+
+The dataset has has `r nrow(instacart)` rows and `r ncol(instacart)` columns. The dataset contains `r colnames(instacart)` variables. In the dataset of instacart, the variable of add_to_cart_order means order in which each product was added to the cart. The variable of order_number means the order sequence number of this users. The varibale of aisle means the name of the aisle.I choose the order identifier 1, which the product identifier is 49302 and customer identifier is 112108, and the name of product is Bulgarian Yogurt as one example. At this example, the product is the first order to add the cart and has been ordered by this users in the past. The order of this product is placed 4 times one week and it is 10 times the hour of the day, The aisle of this product is in yogurt and department is dairy eggs.
+
+## How many aisles are there, and which aisles are the most items ordered from?
+```{r}
+instacart %>% 
+  distinct(aisle) %>% 
+  nrow()
+
+tail(names(sort(table(instacart$aisle))),1)
+```
+There are 134 aisles in this dataset, and the most items are orderd from the "fresh vegetables".
+
+
+## Make a plot that shows the number of items ordered in each aisle. Order aisles sensibly, and organize your plot so others can read it.
+```{r}
+instacart %>% 
+  group_by(aisle_id) %>% 
+  summarise(n = n()) %>% 
+  ggplot(aes(x = aisle_id, y = n)) + 
+  geom_point() + 
+  labs(
+    title = "Aisle distribution plot",
+    x= "Aisle_ID",
+    y= "Number of orders placed"
+  )
+```
+
+## Make a table showing the most popular item aisles “baking ingredients”, “dog food care”, and “packaged vegetables fruits”
+```{r}
+most_ais = instacart %>% 
+  group_by(aisle, product_id, product_name) %>% 
+  filter(aisle == "baking ingredients"|aisle == "dog food care"|aisle == "packaged vegetables fruits") %>% 
+  count() %>% 
+  group_by(aisle) %>% 
+  arrange(n) %>% 
+  filter(min_rank(desc(n)) ==1)
+knitr::kable(most_ais)
+```
+
+## Make a table showing the mean hour of the day at which Pink Lady Apples and Coffee Ice Cream are ordered on each day of the week
+```{r}
+mean_instacart = instacart %>% 
+  select(order_hour_of_day, product_name, order_dow) %>% 
+  filter(product_name == "Pink Lady Apples"| product_name == "Coffee Ice Cream") %>% 
+  group_by(product_name, order_dow) %>% 
+  summarize(mean_hour = mean(order_hour_of_day)) %>% 
+  spread(key = order_dow, value = mean_hour)
+
+ knitr::kable(mean_instacart) 
+```

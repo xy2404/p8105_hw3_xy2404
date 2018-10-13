@@ -101,3 +101,89 @@ ggplot(five_panel, aes(x = year, y = average_response))+
 ```
 
 ![](Homework_3_files/figure-markdown_github/unnamed-chunk-5-1.png)
+
+Problem 2
+=========
+
+``` r
+library(p8105.datasets)
+data(instacart)
+```
+
+The dataset has has 1384617 rows and 15 columns. The dataset contains order\_id, product\_id, add\_to\_cart\_order, reordered, user\_id, eval\_set, order\_number, order\_dow, order\_hour\_of\_day, days\_since\_prior\_order, product\_name, aisle\_id, department\_id, aisle, department variables. In the dataset of instacart, the variable of add\_to\_cart\_order means order in which each product was added to the cart. The variable of order\_number means the order sequence number of this users. The varibale of aisle means the name of the aisle.I choose the order identifier 1, which the product identifier is 49302 and customer identifier is 112108, and the name of product is Bulgarian Yogurt as one example. At this example, the product is the first order to add the cart and has been ordered by this users in the past. The order of this product is placed 4 times one week and it is 10 times the hour of the day, The aisle of this product is in yogurt and department is dairy eggs.
+
+How many aisles are there, and which aisles are the most items ordered from?
+----------------------------------------------------------------------------
+
+``` r
+instacart %>% 
+  distinct(aisle) %>% 
+  nrow()
+```
+
+    ## [1] 134
+
+``` r
+tail(names(sort(table(instacart$aisle))),1)
+```
+
+    ## [1] "fresh vegetables"
+
+There are 134 aisles in this dataset, and the most items are orderd from the "fresh vegetables".
+
+Make a plot that shows the number of items ordered in each aisle. Order aisles sensibly, and organize your plot so others can read it.
+--------------------------------------------------------------------------------------------------------------------------------------
+
+``` r
+instacart %>% 
+  group_by(aisle_id) %>% 
+  summarise(n = n()) %>% 
+  ggplot(aes(x = aisle_id, y = n)) + 
+  geom_point() + 
+  labs(
+    title = "Aisle distribution plot",
+    x= "Aisle_ID",
+    y= "Number of orders placed"
+  )
+```
+
+![](Homework_3_files/figure-markdown_github/unnamed-chunk-8-1.png)
+
+Make a table showing the most popular item aisles “baking ingredients”, “dog food care”, and “packaged vegetables fruits”
+-------------------------------------------------------------------------------------------------------------------------
+
+``` r
+most_ais = instacart %>% 
+  group_by(aisle, product_id, product_name) %>% 
+  filter(aisle == "baking ingredients"|aisle == "dog food care"|aisle == "packaged vegetables fruits") %>% 
+  count() %>% 
+  group_by(aisle) %>% 
+  arrange(n) %>% 
+  filter(min_rank(desc(n)) ==1)
+knitr::kable(most_ais)
+```
+
+| aisle                      |  product\_id| product\_name                                 |     n|
+|:---------------------------|------------:|:----------------------------------------------|-----:|
+| dog food care              |          722| Snack Sticks Chicken & Rice Recipe Dog Treats |    30|
+| baking ingredients         |        23537| Light Brown Sugar                             |   499|
+| packaged vegetables fruits |        21903| Organic Baby Spinach                          |  9784|
+
+Make a table showing the mean hour of the day at which Pink Lady Apples and Coffee Ice Cream are ordered on each day of the week
+--------------------------------------------------------------------------------------------------------------------------------
+
+``` r
+mean_instacart = instacart %>% 
+  select(order_hour_of_day, product_name, order_dow) %>% 
+  filter(product_name == "Pink Lady Apples"| product_name == "Coffee Ice Cream") %>% 
+  group_by(product_name, order_dow) %>% 
+  summarize(mean_hour = mean(order_hour_of_day)) %>% 
+  spread(key = order_dow, value = mean_hour)
+
+ knitr::kable(mean_instacart) 
+```
+
+| product\_name    |         0|         1|         2|         3|         4|         5|         6|
+|:-----------------|---------:|---------:|---------:|---------:|---------:|---------:|---------:|
+| Coffee Ice Cream |  13.77419|  14.31579|  15.38095|  15.31818|  15.21739|  12.26316|  13.83333|
+| Pink Lady Apples |  13.44118|  11.36000|  11.70213|  14.25000|  11.55172|  12.78431|  11.93750|
