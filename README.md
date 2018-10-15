@@ -1,2 +1,2 @@
 # p8105_hw3_xy2404
-The Howework3 is completed. 
+This report is Homework_3 and has been completed. 
