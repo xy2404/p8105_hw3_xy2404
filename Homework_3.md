@@ -55,6 +55,8 @@ brfss %>%
 
 ![](Homework_3_files/figure-markdown_github/unnamed-chunk-3-1.png)
 
+From the spaghetti plot, we could observe the location of FL" is the most.
+
 Make a table showing, for the years 2002, 2006, and 2010, the mean and standard deviation of the proportion of “Excellent” responses across locations in NY State.
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -101,6 +103,8 @@ ggplot(five_panel, aes(x = year, y = average_response))+
 ```
 
 ![](Homework_3_files/figure-markdown_github/unnamed-chunk-5-1.png)
+
+The five-panel plot show the highest of average over time is Very good, the lowerest of average over time is Poor. The average over time of Excellent and Good are similar.
 
 Problem 2
 =========
@@ -149,6 +153,8 @@ instacart %>%
 
 ![](Homework_3_files/figure-markdown_github/unnamed-chunk-8-1.png)
 
+I make the scatteplot for this question, the x-axis is Aisle\_ID and the y-axis is the number of order placed. This plot has shown there are two highest point.
+
 Make a table showing the most popular item aisles “baking ingredients”, “dog food care”, and “packaged vegetables fruits”
 -------------------------------------------------------------------------------------------------------------------------
 
@@ -169,6 +175,8 @@ knitr::kable(most_ais)
 | baking ingredients         |        23537| Light Brown Sugar                             |   499|
 | packaged vegetables fruits |        21903| Organic Baby Spinach                          |  9784|
 
+The most popular items aisles "god food care" has 30 and its product name is "Snack Sticks Chincken and Rice precipe Dog Treats". The most popular items aisles "baking ingredients" has 499 and its product name is "Light Brown Suger". The most popular items aisles "Package vegetables firuts" has 9784 and its product name is "Organic Baby Spinach". And it is the most aisles.
+
 Make a table showing the mean hour of the day at which Pink Lady Apples and Coffee Ice Cream are ordered on each day of the week
 --------------------------------------------------------------------------------------------------------------------------------
 
@@ -188,6 +196,8 @@ mean_instacart = instacart %>%
 | Coffee Ice Cream |  13.77419|  14.31579|  15.38095|  15.31818|  15.21739|  12.26316|  13.83333|
 | Pink Lady Apples |  13.44118|  11.36000|  11.70213|  14.25000|  11.55172|  12.78431|  11.93750|
 
+From ths table, we can conclude the order of the mean hour of the day at "Coffee Ice Cream" is more than the mean hour of the day at "Pink Lady Apples".
+
 Problem 3
 =========
 
@@ -196,7 +206,7 @@ library(p8105.datasets)
 data(ny_noaa)
 ```
 
-The dataset has has 2595176 rows and 7 columns. The dataset contains id, date, prcp, snow, snwd, tmax, tmin variables.
+The dataset is from the NOAA National Climatic Data Center. it showed the maximum and minimum temperature, total daily precipitation, snowfall and snow depth. The dataset has has 2595176 rows and 7 columns. The dataset contains id, date, prcp, snow, snwd, tmax, tmin variables. Because there are missing data(NA), we need to remove NA first if we hope to do some data processing.
 
 Do some data cleaning. Create separate variables for year, month, and day. Ensure observations for temperature, precipitation, and snowfall are given in reasonable units. For snowfall, what are the most commonly observed values? Why?
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -219,18 +229,20 @@ knitr::kable(nynoaa %>%
 |-----:|--------:|-------------:|
 |     0|  2008508|             1|
 
+The most commonly observed values is 0, because most of time is no snowfall.
+
 Make a two-panel plot showing the average max temperature in January and in July in each station across years. Is there any observable / interpretable structure? Any outliers?
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 ``` r
 ny_df_1 =
   nynoaa %>% 
-  group_by(month,id) %>% 
+  group_by(month,id,year) %>% 
   mutate(tmax = as.numeric(tmax)) %>% 
   mutate(tmin = as.numeric(tmin)) %>% 
   filter(month == "01"|month == "07") %>%
   na.omit() %>% 
-  summarise(mean_temp = mean(tmax))
+  summarise(mean_temp = mean(tmax*0.1))
 ```
 
 ``` r
@@ -245,14 +257,17 @@ ggplot(aes(y = mean_temp))+
 
 ``` r
 ny_df_1 %>% 
-ggplot(aes(x = id, y = mean_temp))+
+ggplot(aes(x = year, y = mean_temp))+
    geom_point()+
    ggtitle("The average max temperature in January and in July in each station across years")+
    facet_grid(.~month)+
+   stat_summary(fun.y = median, geom = "point", color = "blue", size =1)+
    viridis::scale_fill_viridis(discrete = TRUE)
 ```
 
 ![](Homework_3_files/figure-markdown_github/unnamed-chunk-15-1.png)
+
+In January, there are outliers and In July, there are also outliers. From the boxplot, we can conclude the average maximum temperature in July is higher than thenaverage maximum temperature in January becasue it is summer in July.
 
 Make a two-panel plot showing (i) tmax vs tmin for the full dataset (note that a scatterplot may not be the best option).(2)Make a plot showing the distribution of snowfall values greater than 0 and less than 100 separately by year.
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -279,3 +294,5 @@ snowfall_value<-nynoaa %>%
 ```
 
 ![](Homework_3_files/figure-markdown_github/unnamed-chunk-16-1.png)
+
+The plot of tmax vs tmin show a linear relationship. When the tmin is icreasing, the tmax is increaing too. According to commpare the temperature plot and the distribution of snowfall values, we can conclude when the temperature is lowest, the snowfall values is the most. When the temperature is highest, there is no snowfall.
